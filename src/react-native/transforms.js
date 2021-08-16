@@ -73,7 +73,7 @@ async function handleItemWithError(item, options, callback) {
   var parsedError = errorParser.parse(err);
   // `stack` is a promise so resolve before continuing
   parsedError.stack = await parsedError.stack
-  for (const chainItem of parsedError.traceChain){
+  for (const chainItem of parsedError.traceChain || []){
     chainItem.stack = await chainItem.stack
   }
   var guess = errorParser.guessErrorClass(parsedError.message);

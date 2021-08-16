@@ -4601,7 +4601,7 @@ async function handleItemWithError(item, options, callback) {
       item.stackInfo = item.err._savedStackTrace || errorParser.parse(item.err, item.skipFrames);
       // `stack` is a promise so resolve before continuing
       item.stackInfo.stack = await item.stackInfo.stack
-      for (const chainItem of item.stackInfo.traceChain){
+      for (const chainItem of item.stackInfo.traceChain || []){
         chainItem.stack = await chainItem.stack
       }
 
