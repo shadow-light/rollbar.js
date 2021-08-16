@@ -1,4 +1,6 @@
 var ErrorStackParser = require('error-stack-parser');
+var StacktraceGPS = require('stacktrace-gps')
+var gps = new StacktraceGPS()
 
 var UNKNOWN_FUNCTION = '?';
 var ERR_CLASS_REGEXP = new RegExp('^(([a-zA-Z0-9-_$ ]*): *)?(Uncaught )?([a-zA-Z0-9-_$ ]*): ');
@@ -31,13 +33,14 @@ function Frame(stackFrame) {
 
 
 function Stack(exception, skip) {
-  function getStack() {
+  async function getStack() {
     var parserStack = [];
 
     skip = skip || 0;
 
     try {
-      parserStack = ErrorStackParser.parse(exception);
+      parserStack = await Promise.all(ErrorStackParser.parse(exception)
+        .map(frame => gps.pinpoint(frame)));
     } catch(e) {
       parserStack = [];
     }
@@ -54,7 +57,7 @@ function Stack(exception, skip) {
   return {
     stack: getStack(),
     message: exception.message,
-    name: _mostSpecificErrorName(exception),
+    name: mostSpecificErrorName(exception),
     rawStack: exception.stack,
     rawException: exception
   };
@@ -100,7 +103,7 @@ function guessErrorClass(errMsg) {
 // * Prefers any value over an empty string
 // * Prefers any value over 'Error' where possible
 // * Prefers name over constructor.name when both are more specific than 'Error'
-function _mostSpecificErrorName(error) {
+function mostSpecificErrorName(error) {
   var name = error.name && error.name.length && error.name;
   var constructorName = error.constructor.name && error.constructor.name.length && error.constructor.name;
 
@@ -115,6 +118,7 @@ function _mostSpecificErrorName(error) {
 }
 
 module.exports = {
+  mostSpecificErrorName: mostSpecificErrorName,
   guessFunctionName: guessFunctionName,
   guessErrorClass: guessErrorClass,
   gatherContext: gatherContext,

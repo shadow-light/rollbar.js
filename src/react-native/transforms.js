@@ -60,7 +60,7 @@ function addBody(item, options, callback) {
   }
 }
 
-function handleItemWithError(item, options, callback) {
+async function handleItemWithError(item, options, callback) {
   if (!item.err) {
     return callback(null, item);
   }
@@ -71,6 +71,11 @@ function handleItemWithError(item, options, callback) {
 
   var err = item.err;
   var parsedError = errorParser.parse(err);
+  // `stack` is a promise so resolve before continuing
+  parsedError.stack = await parsedError.stack
+  for (const chainItem of parsedError.traceChain){
+    chainItem.stack = await chainItem.stack
+  }
   var guess = errorParser.guessErrorClass(parsedError.message);
   var message = guess[1];
   var stackInfo = {

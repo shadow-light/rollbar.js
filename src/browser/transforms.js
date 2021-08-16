@@ -3,7 +3,7 @@ var errorParser = require('../errorParser');
 var logger = require('./logger');
 
 function handleDomException(item, options, callback) {
-  if(item.err && errorParser.Stack(item.err).name === 'DOMException') {
+  if(item.err && errorParser.mostSpecificErrorName(item.err) === 'DOMException') {
     var originalError = new Error();
     originalError.name = item.err.name;
     originalError.message = item.err.message;
@@ -14,11 +14,16 @@ function handleDomException(item, options, callback) {
   callback(null, item);
 }
 
-function handleItemWithError(item, options, callback) {
+async function handleItemWithError(item, options, callback) {
   item.data = item.data || {};
   if (item.err) {
     try {
       item.stackInfo = item.err._savedStackTrace || errorParser.parse(item.err, item.skipFrames);
+      // `stack` is a promise so resolve before continuing
+      item.stackInfo.stack = await item.stackInfo.stack
+      for (const chainItem of item.stackInfo.traceChain){
+        chainItem.stack = await chainItem.stack
+      }
 
       if (options.addErrorContext) {
         addErrorContext(item);
