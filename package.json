@@ -18,7 +18,7 @@
     "lru-cache": "~2.2.1",
     "request-ip": "~2.0.1",
     "source-map": "^0.5.7",
-    "stacktrace-gps": "^3.0.4",
+    "stacktrace-gps": "git+https://github.com/shadow-light/stacktrace-gps.git#custom",
     "uuid": "3.0.x"
   },
   "devDependencies": {

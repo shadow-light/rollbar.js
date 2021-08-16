@@ -5417,7 +5417,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
             if (loc.source) {
                 // cache mapped sources
-                var mappedSource = sourceMapConsumer.sourceContentFor(loc.source);
+                var mappedSource;
+                try {
+                    mappedSource = sourceMapConsumer.sourceContentFor(loc.source);
+                } catch(error){}
                 if (mappedSource) {
                     sourceCache[loc.source] = mappedSource;
                 }
@@ -5515,7 +5518,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
                             }
 
                             resolve(new SourceMap.SourceMapConsumer(sourceMapSource));
-                        }, reject);
+                        }).catch(reject);
                     }.bind(this));
                     this.sourceMapConsumerCache[sourceMappingURL] = sourceMapConsumerPromise;
                     resolve(sourceMapConsumerPromise);
